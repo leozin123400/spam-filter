@@ -101,7 +101,7 @@ def main():
         args=args,
         train_dataset=dataset_tok["train"],
         eval_dataset=dataset_tok["test"],
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=data_collator,
         compute_metrics=calcular_metricas,
     )
