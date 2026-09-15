@@ -5,7 +5,10 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
-models/*
-!models/.gitkeep
+# Ignore large model weights and optimizer states
+*.safetensors
+*.pt
+*.pth
+*.bin
 .env
 .ipynb_checkpoints/
