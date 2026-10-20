@@ -56,6 +56,20 @@ Isso vai:
 - Avaliar com as mesmas métricas do baseline, para comparação direta
 - Salvar o modelo treinado em `models/`
 
+### 4. Interface desktop (baseline)
+
+```bash
+python src/app.py
+```
+
+- Na primeira execução, clique em **Treinar agora** (ou rode `python src/baseline.py`, que também salva o modelo em `models/baseline/baseline.joblib`).
+- Cole uma mensagem e veja o veredito, a probabilidade e as palavras que mais pesaram.
+- O **limiar de decisão** é ajustável: subir o limiar reduz falsos positivos.
+- A aba **Métricas** mostra as métricas e a matriz de confusão do último treino.
+- No Linux, o `tkinter` pode precisar ser instalado à parte (`sudo apt install python3-tk`).
+
+A lógica de inferência fica em `src/predict.py`, separada da interface, para facilitar a futura integração do DistilBERT.
+
 ## Próximos passos sugeridos
 
 1. Trocar o dataset de exemplo por um mais próximo do seu caso real (SpamAssassin, Enron, ou dados internos anonimizados)

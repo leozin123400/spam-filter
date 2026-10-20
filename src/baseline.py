@@ -88,9 +88,24 @@ def treinar_baseline(df: pd.DataFrame):
         "e-mails legítimos classificados erroneamente como spam."
     )
 
-    return modelo, vectorizer
+    cm = confusion_matrix(y_test, y_pred)
+    metricas = {
+        "acuracia": float(accuracy_score(y_test, y_pred)),
+        "precisao": float(precision_score(y_test, y_pred)),
+        "recall": float(recall_score(y_test, y_pred)),
+        "f1": float(f1_score(y_test, y_pred)),
+        "matriz_confusao": cm.tolist(),
+        "n_treino": int(len(X_train)),
+        "n_teste": int(len(X_test)),
+    }
+
+    return modelo, vectorizer, metricas
 
 
 if __name__ == "__main__":
+    from predict import salvar_baseline
+
     dados = carregar_dataset()
-    treinar_baseline(dados)
+    modelo_nb, vetorizador, metricas_nb = treinar_baseline(dados)
+    caminho = salvar_baseline(modelo_nb, vetorizador, metricas_nb)
+    print(f"\nModelo salvo em: {caminho}")
