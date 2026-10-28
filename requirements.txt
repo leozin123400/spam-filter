@@ -5,7 +5,7 @@ numpy>=1.24.0
 
 # --- Deep Learning / Transformers ---
 torch>=2.1.0
-transformers>=4.36.0
+transformers>=4.46.0
 datasets>=2.16.0
 accelerate>=0.25.0
 evaluate>=0.4.1

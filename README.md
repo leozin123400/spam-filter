@@ -56,19 +56,37 @@ Isso vai:
 - Avaliar com as mesmas métricas do baseline, para comparação direta
 - Salvar o modelo treinado em `models/`
 
-### 4. Interface desktop (baseline)
+### 4. Interface desktop (todas as versões de modelo)
 
 ```bash
 python src/app.py
 ```
 
-- Na primeira execução, clique em **Treinar agora** (ou rode `python src/baseline.py`, que também salva o modelo em `models/baseline/baseline.joblib`).
-- Cole uma mensagem e veja o veredito, a probabilidade e as palavras que mais pesaram.
-- O **limiar de decisão** é ajustável: subir o limiar reduz falsos positivos.
-- A aba **Métricas** mostra as métricas e a matriz de confusão do último treino.
-- No Linux, o `tkinter` pode precisar ser instalado à parte (`sudo apt install python3-tk`).
+O menu **Modelo** lista tudo o que existe em `models/`: o baseline e cada fine-tuning do DistilBERT
+(um item por checkpoint de época, mais o modelo final). "melhor F1" marca a versão com o maior F1 do treino.
 
-A lógica de inferência fica em `src/predict.py`, separada da interface, para facilitar a futura integração do DistilBERT.
+- **Analisar:** cola uma mensagem e mostra veredito e probabilidade. O limiar de decisão é ajustável
+  (subir o limiar reduz falsos positivos). O baseline também lista as palavras que mais pesaram.
+- **Comparar:** roda a mesma mensagem em todas as versões disponíveis, lado a lado.
+- **Métricas:** números da versão escolhida e uma tabela com todas as versões.
+
+**Pesos fora do Git.** O `model.safetensors` do DistilBERT não fica no repositório (ver `.gitignore`).
+Versões sem pesos aparecem como "indisponível" na lista, mas o histórico de métricas
+(`trainer_state.json`) continua visível. Para rodar o DistilBERT, gere os pesos com
+`python src/finetune_distilbert.py` ou copie a pasta `models/distilbert-spam-filter/` completa (com os pesos)
+da máquina onde o treino foi feito. Use o botão **Atualizar lista** depois de copiar.
+
+**Baseline.** Na primeira execução, clique em **Treinar agora** (ou rode `python src/baseline.py`), que salva
+`models/baseline/baseline.joblib`. Esse arquivo é um pickle: só carregue arquivos que você mesmo treinou.
+
+**Comparando métricas.** O baseline é avaliado com um teste estratificado e o DistilBERT com a divisão do
+Hugging Face. As duas usam semente 42 e 20% de teste, mas os conjuntos de teste não são os mesmos, então
+diferenças pequenas entre elas não são conclusivas.
+
+**Requisitos.** Python 3.10 ou superior. No Linux, o `tkinter` pode precisar de instalação à parte
+(`sudo apt install python3-tk`). O DistilBERT precisa de `torch` e `transformers`; o baseline roda sem eles.
+
+A lógica de inferência fica em `src/predict.py`, separada da interface.
 
 ## Próximos passos sugeridos
 

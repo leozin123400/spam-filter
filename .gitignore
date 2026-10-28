@@ -12,3 +12,6 @@ data/processed/*
 *.bin
 .env
 .ipynb_checkpoints/
+
+# Pickles de modelos (carregar pickle executa código: nunca versione nem aceite de terceiros)
+*.joblib
