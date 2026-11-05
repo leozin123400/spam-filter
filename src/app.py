@@ -23,6 +23,7 @@ delas continua visível.
 import gc
 import os
 import queue
+import random
 import sys
 import threading
 import time
@@ -56,16 +57,55 @@ COR_AVISO = ("#fff3cd", "#4a3f12")
 
 CACHE_MAX = 2  # quantos classificadores ficam na memória ao mesmo tempo
 
+# Cada botão sorteia um dos textos da sua lista (sem repetir o último que apareceu).
+# Os modelos foram treinados com SMS em inglês, então os exemplos ficam em inglês.
+# Nomes, números e valores são fictícios.
 EXEMPLOS = {
-    "Exemplo: spam": (
-        "WINNER!! As a valued network customer you have been selected to receive "
-        "a £900 prize reward! To claim call 09061701461. Claim code KL341. "
-        "Valid 12 hours only."
-    ),
-    "Exemplo: legítimo": (
-        "Hey, are we still on for dinner tonight? I can pick you up around 7 "
-        "if that works for you."
-    ),
+    "Exemplo: spam": [
+        (
+            "WINNER!! As a valued network customer you have been selected to receive "
+            "a £900 prize reward! To claim call 09061701461. Claim code KL341. "
+            "Valid 12 hours only."
+        ),
+        (
+            "URGENT! You have won a 1 week FREE membership in our £100,000 prize jackpot! "
+            "Txt the word CLAIM to 81010 now. T&Cs apply. 18+ only."
+        ),
+        (
+            "Congratulations! Your mobile number has been selected for a FREE £500 cash reward. "
+            "Call 0906 555 0142 now to claim. Offer ends tonight, reply STOP to opt out."
+        ),
+        (
+            "FREE entry in our weekly competition to win a brand new phone! Text WIN to 80082 "
+            "to enter. Cash prizes and free gifts waiting for you. Hurry, last chance!"
+        ),
+        (
+            "Final notice: you have been selected for a special loan offer. Get cash up to "
+            "£5,000 today, no credit check! Call now on 08001 234 567 to claim your bonus."
+        ),
+    ],
+    "Exemplo: legítimo": [
+        (
+            "Hey, are we still on for dinner tonight? I can pick you up around 7 "
+            "if that works for you."
+        ),
+        (
+            "Hi Marcos, I attached the report for Friday's meeting. Can you review the "
+            "second section before noon tomorrow? Let me know if the numbers look right. Thanks, Ana"
+        ),
+        (
+            "Hey, just checking in. Are you coming to mom's birthday lunch on Sunday? "
+            "I'll bring the cake, can you pick up some drinks on the way?"
+        ),
+        (
+            "Thanks for lunch yesterday, it was great catching up. Let's do it again next week. "
+            "I'll send you the photos from the trip tonight."
+        ),
+        (
+            "Hi team, the project deadline moved to next Thursday. Please send me your updates "
+            "by Monday and I'll put everything together. Let me know if you have any questions."
+        ),
+    ],
 }
 
 
@@ -100,6 +140,7 @@ class App(ctk.CTk):
         self._ultimo_resultado = None
         self._treinando = False
         self._comparando = False
+        self._ultimo_exemplo = {}  # rótulo do botão -> último texto sorteado
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
@@ -245,7 +286,7 @@ class App(ctk.CTk):
             linha, text="Limpar", width=90, fg_color="gray40", hover_color="gray30", command=self._limpar
         ).grid(row=0, column=1, padx=(0, 8))
 
-        for i, (rotulo, texto) in enumerate(EXEMPLOS.items()):
+        for i, rotulo in enumerate(EXEMPLOS):
             ctk.CTkButton(
                 linha,
                 text=rotulo,
@@ -253,7 +294,7 @@ class App(ctk.CTk):
                 fg_color="transparent",
                 border_width=1,
                 text_color=("gray20", "gray85"),
-                command=lambda t=texto: self._usar_exemplo(t),
+                command=lambda r=rotulo: self._usar_exemplo(r),
             ).grid(row=0, column=2 + i, padx=(0, 8))
 
         self.var_tempo_real = ctk.BooleanVar(value=True)
@@ -713,7 +754,12 @@ class App(ctk.CTk):
         self._atualizar_previa_comparacao("")
         self.caixa.focus_set()
 
-    def _usar_exemplo(self, texto):
+    def _usar_exemplo(self, rotulo):
+        """Sorteia um exemplo do grupo (spam ou legítimo), evitando repetir o último."""
+        opcoes = EXEMPLOS[rotulo]
+        anterior = self._ultimo_exemplo.get(rotulo)
+        texto = random.choice([t for t in opcoes if t != anterior] or opcoes)
+        self._ultimo_exemplo[rotulo] = texto
         self.caixa.delete("1.0", "end")
         self.caixa.insert("1.0", texto)
         self._analisar()
